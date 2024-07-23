@@ -19,8 +19,10 @@ const logIn = async (req, res) => {
       });
     }
 
-    // Launch the browser
-    await launchBrowser();
+    // Launch the browser if it's not already running
+    if (!getBrowser()) {
+      await launchBrowser();
+    }
     browser = getBrowser();
 
     if (!browser) {
@@ -52,13 +54,6 @@ const logIn = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: 'An error occurred during login' });
-  } finally {
-    if (page) {
-      await page.close();
-    }
-    if (browser) {
-      await closeBrowser();
-    }
   }
 };
 
@@ -66,9 +61,9 @@ const logOut = async (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       res.status(500).json({ message: 'Could not log out, please try again' });
+      closeBrowser();
     } else {
       res.json({ message: 'Logged out successfully' });
-      closeBrowser();
     }
   });
 };
